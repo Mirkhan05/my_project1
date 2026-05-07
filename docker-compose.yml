@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    restart: always
+    env_file: .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+
+  web:
+    build: ./backend
+    restart: always
+    env_file: .env
+    volumes:
+      - ./backend/static:/app/static
+    depends_on:
+      - db
+
+  frontend:
+    build: ./frontend
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./backend/static:/app/static # Шарим статику бэкенда во фронт-nginx
+    depends_on:
+      - web
+
+volumes:
+  postgres_data:
+
+
+#docker compose up -d --build
+#docker compose exec web python manage.py migrate
+#docker compose exec web python manage.py createsuperuser
